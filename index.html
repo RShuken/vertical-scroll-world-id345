@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Ryan Shuken</title>
+  <meta name="description" content="Ryan Shuken builds AI systems that do real work. Scroll to descend from orbit to the valley." />
+  <style>
+    :root, .sw-root { --sw-bg:#06090f; --sw-ink:#f2ede2; --sw-ink-soft:#a9a294; --sw-accent:#7fb069; }
+    /* Cinematic mode: the world carries all the text — hide every engine overlay */
+    .sw-nav,.sw-route,.sw-brand,.sw-hint,.sw-copylayer{display:none !important}
+    /* The only interactive element: an invisible "knock on the mailbox" hotspot at journey's end */
+    #sayhi{position:fixed;left:50%;bottom:9vh;transform:translateX(-50%);width:120px;height:120px;
+      border-radius:50%;display:block;opacity:0;pointer-events:none;transition:opacity .8s}
+    #sayhi.live{opacity:1;pointer-events:auto}
+    #sayhi::after{content:'';position:absolute;inset:34px;border-radius:50%;
+      border:2px solid rgba(242,237,226,.85);animation:knock 2.2s ease-out infinite}
+    @keyframes knock{0%{transform:scale(.55);opacity:.9}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+  </style>
+</head>
+<body>
+  <div id="top"></div>
+  <div id="world">
+    <section data-sw-seo>
+      <h1>Ryan Shuken builds AI systems that do real work.</h1>
+      <p>Coding since 12. Shanghai for half a life. Ten years in venture capital — then he started shipping his own builds: AI assistants, trained teams, autonomous dev studios. Denver based, working everywhere.</p>
+      <h2>The workshop</h2>
+      <p>Agents at work: they file the tickets, write the drafts, and watch the deploys — honest fit checks first.</p>
+      <h2>Say hi</h2>
+      <p><a href="mailto:ryanshuken@gmail.com">Email Ryan Shuken</a></p>
+    </section>
+  </div>
+  <a id="sayhi" href="mailto:ryanshuken@gmail.com" aria-label="Email Ryan Shuken"></a>
+
+  <script src="scrub-engine.js"></script>
+  <script>
+    mountScrollWorld(document.getElementById('world'), {
+      brand: { name: 'RYAN SHUKEN', href: '#top' },
+      hint: '',
+      diveScroll: 1.7,
+      connScroll: 0.9,
+      crossfade: 0.14,
+      sections: [
+        { id:'orbit',    label:'Orbit',    still:'assets/leg1-poster.jpg', poster:'assets/leg1-poster.jpg', clip:'assets/leg1.mp4', accent:'#9fc4e8', scroll:1.9, linger:0.35 },
+        { id:'sky',      label:'Sky',      still:'assets/leg2-poster.jpg', poster:'assets/leg2-poster.jpg', clip:'assets/leg2.mp4', accent:'#6fa8dc', scroll:1.7, linger:0.35 },
+        { id:'workshop', label:'Workshop', still:'assets/leg3-poster.jpg', poster:'assets/leg3-poster.jpg', clip:'assets/leg3.mp4', accent:'#e8dcc0', scroll:1.9, linger:0.4 },
+        { id:'valley',   label:'Valley',   still:'assets/leg4-poster.jpg', poster:'assets/leg4-poster.jpg', clip:'assets/leg4.mp4', accent:'#e8b04d', scroll:2.1, linger:0.4 },
+      ],
+      connectors: [null, null, null],
+    });
+    // reveal the mailbox hotspot only at the very bottom of the descent
+    const hotspot=document.getElementById('sayhi');
+    addEventListener('scroll',()=>{
+      const m=document.body.scrollHeight-innerHeight;
+      hotspot.classList.toggle('live', m>0 && scrollY/m>0.96);
+    },{passive:true});
+  </script>
+</body>
+</html>
