@@ -25,6 +25,14 @@
       border-top:11px solid transparent;border-bottom:11px solid transparent}
     #play.playing::before{border:none;left:19px;top:17px;width:5px;height:20px;background:rgba(242,237,226,.92);
       box-shadow:11px 0 0 rgba(242,237,226,.92)}
+    #speed{position:fixed;right:5.6rem;bottom:1.75rem;display:flex;gap:6px;z-index:60;
+      opacity:0;pointer-events:none;transition:opacity .3s}
+    #speed.show{opacity:1;pointer-events:auto}
+    #speed button{font:700 .62rem/1 ui-monospace,monospace;letter-spacing:.05em;color:rgba(242,237,226,.75);
+      background:rgba(6,9,15,.55);border:1px solid rgba(242,237,226,.3);border-radius:999px;
+      padding:.45rem .6rem;cursor:pointer;backdrop-filter:blur(6px);transition:all .2s}
+    #speed button:hover{border-color:rgba(242,237,226,.7)}
+    #speed button.on{background:rgba(242,237,226,.92);color:#101418;border-color:transparent}
   </style>
 </head>
 <body>
@@ -38,6 +46,9 @@
       <h2>Say hi</h2>
       <p><a href="mailto:ryanshuken@gmail.com">Email Ryan Shuken</a></p>
     </section>
+  </div>
+  <div id="speed" aria-label="Playback speed">
+    <button data-s="1">&times;1</button><button data-s="2" class="on">&times;2</button><button data-s="3">&times;3</button><button data-s="5">&times;5</button>
   </div>
   <button id="play" aria-label="Play the descent"></button>
   <a id="sayhi" href="mailto:ryanshuken@gmail.com" aria-label="Email Ryan Shuken"></a>
@@ -67,13 +78,15 @@
     // demo autoplay: slow scripted descent; any user input returns control
     const playBtn=document.getElementById('play');
     let playing=false,rafId=null,lastTs=0;
-    const JOURNEY_MS=55000;
+    const BASE_JOURNEY_MS=55000;
+    let speed=2;                      // default ×2 — adjustable via the pills
+    const JOURNEY=()=>BASE_JOURNEY_MS/speed;
     function stepPlay(ts){
       if(!playing)return;
       if(!lastTs)lastTs=ts;
       const dt=ts-lastTs; lastTs=ts;
       const m=document.body.scrollHeight-innerHeight;
-      const next=Math.min(m, scrollY+(m/JOURNEY_MS)*dt);
+      const next=Math.min(m, scrollY+(m/JOURNEY())*dt);
       window.scrollTo(0,next);
       if(next>=m-1){stopPlay();return;}
       rafId=requestAnimationFrame(stepPlay);
@@ -84,8 +97,13 @@
       playing=true;lastTs=0;playBtn.classList.add('playing');
       rafId=requestAnimationFrame(stepPlay);
     }
-    function stopPlay(){playing=false;playBtn.classList.remove('playing');cancelAnimationFrame(rafId);}
-    playBtn.addEventListener('click',()=>playing?stopPlay():startPlay());
+    function stopPlay(){playing=false;playBtn.classList.remove('playing');cancelAnimationFrame(rafId);document.getElementById('speed').classList.remove('show');}
+    const speedEl=document.getElementById('speed');
+    function syncSpeedUI(){speedEl.classList.toggle('show',playing);
+      speedEl.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.s===speed));}
+    speedEl.querySelectorAll('button').forEach(b=>b.addEventListener('click',e=>{
+      e.stopPropagation();speed=+b.dataset.s;syncSpeedUI();}));
+    playBtn.addEventListener('click',()=>{playing?stopPlay():startPlay();syncSpeedUI();});
     ['wheel','touchstart','keydown'].forEach(ev=>addEventListener(ev,()=>{if(playing)stopPlay();},{passive:true}));
   </script>
 </body>
