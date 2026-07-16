@@ -16,6 +16,15 @@
     #sayhi::after{content:'';position:absolute;inset:34px;border-radius:50%;
       border:2px solid rgba(242,237,226,.85);animation:knock 2.2s ease-out infinite}
     @keyframes knock{0%{transform:scale(.55);opacity:.9}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+    /* demo autoplay: minimal circular play button, no text */
+    #play{position:fixed;right:1.4rem;bottom:1.4rem;width:54px;height:54px;border-radius:50%;
+      background:rgba(6,9,15,.55);border:1px solid rgba(242,237,226,.35);cursor:pointer;z-index:60;
+      backdrop-filter:blur(6px);transition:all .25s;padding:0}
+    #play:hover{background:rgba(6,9,15,.8);border-color:rgba(242,237,226,.7);transform:scale(1.06)}
+    #play::before{content:'';position:absolute;left:21px;top:16px;border-left:16px solid rgba(242,237,226,.92);
+      border-top:11px solid transparent;border-bottom:11px solid transparent}
+    #play.playing::before{border:none;left:19px;top:17px;width:5px;height:20px;background:rgba(242,237,226,.92);
+      box-shadow:11px 0 0 rgba(242,237,226,.92)}
   </style>
 </head>
 <body>
@@ -30,6 +39,7 @@
       <p><a href="mailto:ryanshuken@gmail.com">Email Ryan Shuken</a></p>
     </section>
   </div>
+  <button id="play" aria-label="Play the descent"></button>
   <a id="sayhi" href="mailto:ryanshuken@gmail.com" aria-label="Email Ryan Shuken"></a>
 
   <script src="scrub-engine.js"></script>
@@ -54,6 +64,29 @@
       const m=document.body.scrollHeight-innerHeight;
       hotspot.classList.toggle('live', m>0 && scrollY/m>0.96);
     },{passive:true});
+    // demo autoplay: slow scripted descent; any user input returns control
+    const playBtn=document.getElementById('play');
+    let playing=false,rafId=null,lastTs=0;
+    const JOURNEY_MS=55000;
+    function stepPlay(ts){
+      if(!playing)return;
+      if(!lastTs)lastTs=ts;
+      const dt=ts-lastTs; lastTs=ts;
+      const m=document.body.scrollHeight-innerHeight;
+      const next=Math.min(m, scrollY+(m/JOURNEY_MS)*dt);
+      window.scrollTo(0,next);
+      if(next>=m-1){stopPlay();return;}
+      rafId=requestAnimationFrame(stepPlay);
+    }
+    function startPlay(){
+      const m=document.body.scrollHeight-innerHeight;
+      if(scrollY>=m-4)window.scrollTo(0,0);
+      playing=true;lastTs=0;playBtn.classList.add('playing');
+      rafId=requestAnimationFrame(stepPlay);
+    }
+    function stopPlay(){playing=false;playBtn.classList.remove('playing');cancelAnimationFrame(rafId);}
+    playBtn.addEventListener('click',()=>playing?stopPlay():startPlay());
+    ['wheel','touchstart','keydown'].forEach(ev=>addEventListener(ev,()=>{if(playing)stopPlay();},{passive:true}));
   </script>
 </body>
 </html>
